@@ -1,0 +1,5 @@
+data_chunks/
+data_clean/
+data_raw/
+venv/
+*.tar.gz
