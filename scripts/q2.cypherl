@@ -1,0 +1,24 @@
+:param targetUserId => 557442625;
+
+MATCH (u:User {user_id: $targetUserId})-[:FRIEND_WITH]-(f:User)-[r:INTERACTED]->(p:Product)
+WHERE NOT EXISTS {
+  MATCH (u)-[:INTERACTED]->(p)
+}
+WITH
+  p,
+  sum(
+    CASE
+      WHEN r.event_type = 'purchase' THEN 5
+      WHEN r.event_type = 'cart' THEN 3
+      WHEN r.event_type = 'view' THEN 1
+      ELSE 0
+    END
+  ) AS recommendation_score
+RETURN
+  p.product_id AS product_id,
+  p.category_code AS category_code,
+  p.brand AS brand,
+  p.price AS price,
+  recommendation_score
+ORDER BY recommendation_score DESC, product_id
+LIMIT 10;

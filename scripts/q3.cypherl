@@ -1,0 +1,8 @@
+MATCH (p:Product)
+WHERE p.product_id IN [28718136, 12709709, 12710984, 12711508, 12720525]
+RETURN
+  p.product_id AS product_id,
+  p.category_code AS category_code,
+  p.brand AS brand,
+  p.price AS price
+LIMIT 10;

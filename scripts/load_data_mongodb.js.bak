@@ -36,21 +36,6 @@ function insertInBatches(collectionName, docs, batchSize = 50) {
   print(`Loaded ${docs.length} documents into ${collectionName}`);
 }
 
-function boolFromString(fieldName) {
-  return {
-    $cond: [
-      {
-        $in: [
-          { $toLower: { $toString: `$${fieldName}` } },
-          ['true', '1', 'yes', 't']
-        ]
-      },
-      true,
-      false
-    ]
-  };
-}
-
 print('Dropping old database...');
 mongoDb.dropDatabase();
 
@@ -103,17 +88,17 @@ mongoDb.campaigns.updateMany({}, [
       started_at: { $convert: { input: '$started_at', to: 'date', onError: null, onNull: null } },
       finished_at: { $convert: { input: '$finished_at', to: 'date', onError: null, onNull: null } },
       total_count: { $convert: { input: '$total_count', to: 'double', onError: null, onNull: null } },
-      ab_test: boolFromString('ab_test'),
-      warmup_mode: boolFromString('warmup_mode'),
+      ab_test: { $convert: { input: '$ab_test', to: 'bool', onError: null, onNull: null } },
+      warmup_mode: { $convert: { input: '$warmup_mode', to: 'bool', onError: null, onNull: null } },
       hour_limit: { $convert: { input: '$hour_limit', to: 'double', onError: null, onNull: null } },
       subject_length: { $convert: { input: '$subject_length', to: 'double', onError: null, onNull: null } },
-      subject_with_personalization: boolFromString('subject_with_personalization'),
-      subject_with_deadline: boolFromString('subject_with_deadline'),
-      subject_with_emoji: boolFromString('subject_with_emoji'),
-      subject_with_bonuses: boolFromString('subject_with_bonuses'),
-      subject_with_discount: boolFromString('subject_with_discount'),
-      subject_with_saleout: boolFromString('subject_with_saleout'),
-      is_test: boolFromString('is_test'),
+      subject_with_personalization: { $convert: { input: '$subject_with_personalization', to: 'bool', onError: null, onNull: null } },
+      subject_with_deadline: { $convert: { input: '$subject_with_deadline', to: 'bool', onError: null, onNull: null } },
+      subject_with_emoji: { $convert: { input: '$subject_with_emoji', to: 'bool', onError: null, onNull: null } },
+      subject_with_bonuses: { $convert: { input: '$subject_with_bonuses', to: 'bool', onError: null, onNull: null } },
+      subject_with_discount: { $convert: { input: '$subject_with_discount', to: 'bool', onError: null, onNull: null } },
+      subject_with_saleout: { $convert: { input: '$subject_with_saleout', to: 'bool', onError: null, onNull: null } },
+      is_test: { $convert: { input: '$is_test', to: 'bool', onError: null, onNull: null } },
       position: { $convert: { input: '$position', to: 'double', onError: null, onNull: null } }
     }
   }
@@ -153,14 +138,14 @@ mongoDb.messages.updateMany({}, [
       complained_at: { $convert: { input: '$complained_at', to: 'date', onError: null, onNull: null } },
       blocked_at: { $convert: { input: '$blocked_at', to: 'date', onError: null, onNull: null } },
       purchased_at: { $convert: { input: '$purchased_at', to: 'date', onError: null, onNull: null } },
-      is_opened: boolFromString('is_opened'),
-      is_clicked: boolFromString('is_clicked'),
-      is_unsubscribed: boolFromString('is_unsubscribed'),
-      is_hard_bounced: boolFromString('is_hard_bounced'),
-      is_soft_bounced: boolFromString('is_soft_bounced'),
-      is_complained: boolFromString('is_complained'),
-      is_blocked: boolFromString('is_blocked'),
-      is_purchased: boolFromString('is_purchased'),
+      is_opened: { $convert: { input: '$is_opened', to: 'bool', onError: null, onNull: null } },
+      is_clicked: { $convert: { input: '$is_clicked', to: 'bool', onError: null, onNull: null } },
+      is_unsubscribed: { $convert: { input: '$is_unsubscribed', to: 'bool', onError: null, onNull: null } },
+      is_hard_bounced: { $convert: { input: '$is_hard_bounced', to: 'bool', onError: null, onNull: null } },
+      is_soft_bounced: { $convert: { input: '$is_soft_bounced', to: 'bool', onError: null, onNull: null } },
+      is_complained: { $convert: { input: '$is_complained', to: 'bool', onError: null, onNull: null } },
+      is_blocked: { $convert: { input: '$is_blocked', to: 'bool', onError: null, onNull: null } },
+      is_purchased: { $convert: { input: '$is_purchased', to: 'bool', onError: null, onNull: null } },
       user_id: { $convert: { input: '$user_id', to: 'long', onError: null, onNull: null } }
     }
   }

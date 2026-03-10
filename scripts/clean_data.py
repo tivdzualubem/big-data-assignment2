@@ -11,6 +11,14 @@ os.makedirs(CLEAN_DIR, exist_ok=True)
 
 CHUNK_SIZE = 50000
 
+
+def parse_bool(value):
+    if pd.isna(value):
+        return False
+    s = str(value).strip().lower()
+    return s in {"true", "1", "t", "yes"}
+
+
 campaigns_path = os.path.join(RAW_DIR, "campaigns.csv")
 first_purchase_path = os.path.join(RAW_DIR, "client_first_purchase_date.csv")
 events_path = os.path.join(RAW_DIR, "events.csv")
@@ -58,13 +66,15 @@ gc.collect()
 # -----------------------------
 users_set = set()
 
-# from first_purchase
-first_purchase_users = pd.read_csv(first_purchase_path, usecols=["user_id"], low_memory=False)
-first_purchase_users["user_id"] = pd.to_numeric(first_purchase_users["user_id"], errors="coerce")
-for u in first_purchase_users["user_id"].dropna().astype(int).tolist():
-    users_set.add(u)
-del first_purchase_users
-gc.collect()
+# from first_purchase, only if user_id exists in that file
+first_purchase_cols = pd.read_csv(first_purchase_path, nrows=0).columns.tolist()
+if "user_id" in first_purchase_cols:
+    first_purchase_users = pd.read_csv(first_purchase_path, usecols=["user_id"], low_memory=False)
+    first_purchase_users["user_id"] = pd.to_numeric(first_purchase_users["user_id"], errors="coerce")
+    for u in first_purchase_users["user_id"].dropna().astype(int).tolist():
+        users_set.add(u)
+    del first_purchase_users
+    gc.collect()
 
 # from friends
 friends_users = pd.read_csv(friends_path, usecols=["friend1", "friend2"], low_memory=False)
@@ -139,12 +149,25 @@ for chunk in pd.read_csv(messages_path, chunksize=CHUNK_SIZE, low_memory=False):
         "sent_at", "is_opened", "is_clicked", "is_purchased", "user_id"
     ]
     msg = chunk[keep_cols].copy()
+
     msg["sent_at"] = pd.to_datetime(msg["sent_at"], errors="coerce")
-    msg.to_csv(messages_out_path, mode="w" if first_messages_chunk else "a", header=first_messages_chunk, index=False)
+    msg["campaign_id"] = pd.to_numeric(msg["campaign_id"], errors="coerce")
+    msg["client_id"] = pd.to_numeric(msg["client_id"], errors="coerce")
+    msg["user_id"] = pd.to_numeric(msg["user_id"], errors="coerce")
+
+    msg["is_opened"] = msg["is_opened"].apply(parse_bool)
+    msg["is_clicked"] = msg["is_clicked"].apply(parse_bool)
+    msg["is_purchased"] = msg["is_purchased"].apply(parse_bool)
+
+    msg.to_csv(
+        messages_out_path,
+        mode="w" if first_messages_chunk else "a",
+        header=first_messages_chunk,
+        index=False
+    )
     first_messages_chunk = False
 
     # users from messages
-    msg["user_id"] = pd.to_numeric(msg["user_id"], errors="coerce")
     for u in msg["user_id"].dropna().astype(int).unique():
         users_set.add(int(u))
 

@@ -1,0 +1,10 @@
+MATCH (c:Campaign)<-[:PART_OF]-(m:Message)
+WITH c, COUNT(m) AS total_messages,
+     COUNT(CASE WHEN m.is_purchased = true THEN 1 END) AS purchases
+RETURN
+    c.campaign_id AS campaign_id,
+    total_messages,
+    purchases,
+    round((toFloat(purchases) / total_messages) * 10000) / 100 AS purchase_rate_percent
+ORDER BY purchase_rate_percent DESC
+LIMIT 10;

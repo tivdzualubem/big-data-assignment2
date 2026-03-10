@@ -3,3 +3,5 @@ data_clean/
 data_raw/
 venv/
 *.tar.gz
+*.csv
+*.json
