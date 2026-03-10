@@ -5,3 +5,7 @@ venv/
 *.tar.gz
 *.csv
 *.json
+data_raw/
+data_clean/
+data_chunks/
+venv/
